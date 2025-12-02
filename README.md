@@ -39,8 +39,3 @@ git remote add origin git@github.com:youruser/gymongo.git
 git push -u origin main
 ```
 
-If you want, tell me the remote repo URL and whether you prefer GitHub Packages (GHCR) or Docker Hub; I can prepare the workflow for that registry and show the exact push steps.
-
----
-
-If you'd like I can now run the test suite locally to verify the added tests; otherwise I can prepare a Docker Hub variant of the CI publish step.
