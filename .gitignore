@@ -1,0 +1,30 @@
+# macOS
+.DS_Store
+
+# Local env files
+.env
+
+# IDEs
+.idea/
+.vscode/
+
+# Build
+/build/
+/out/
+
+# Gradle
+/.gradle/
+/.gradle-cache/
+
+# Logs
+.logs/
+
+# Temporary files
+*.tmp
+/build
+/.gradle
+/.idea
+*.iml
+*.class
+/.DS_Store
+/.env
