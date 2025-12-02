@@ -1,0 +1,364 @@
+openapi: 3.1.0
+info:
+  title: GymOnGo API
+  description: |
+    Draft OpenAPI spec generated from the codebase.
+    - Auth endpoints are public (/api/auth).
+    - Other endpoints require JWT Bearer auth by default (see Security).
+  version: 0.1.0
+servers:
+  - url: http://localhost:8080
+security:
+  - bearerAuth: []
+paths:
+  /api/auth/register:
+    post:
+      summary: Register a new user
+      tags:
+        - Auth
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+            example:
+              username: "alice"
+              password: "P@ssw0rd!"
+              fullName: "Alice Wonder"
+              email: "alice@example.com"
+      responses:
+        '200':
+          description: Registration succeeded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User registered successfully"
+        '400':
+          description: Validation or username exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/auth/login:
+    post:
+      summary: Login and receive JWT token
+      tags:
+        - Auth
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              username: "alice"
+              password: "P@ssw0rd!"
+      responses:
+        '200':
+          description: Returns JWT token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+              example:
+                token: "eyJhbGciOiJIUzI1NiIsInR5cCI..."
+        '401':
+          description: Authentication failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/gyms:
+    get:
+      summary: List all gyms
+      tags:
+        - Gyms
+      responses:
+        '200':
+          description: Array of gyms
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Gym'
+    post:
+      summary: Create a gym
+      tags:
+        - Gyms
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GymCreateRequest'
+            example:
+              name: "Downtown Crossfit"
+              address: "123 Main St"
+              capacity: 40
+      responses:
+        '200':
+          description: Created gym
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Gym'
+  /api/bookings:
+    get:
+      summary: List bookings
+      tags:
+        - Bookings
+      responses:
+        '200':
+          description: Array of bookings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Booking'
+    post:
+      summary: Create a booking (requires authentication)
+      tags:
+        - Bookings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingRequest'
+            example:
+              gymId: 1
+              startTime: "2025-12-10T18:30:00"
+      responses:
+        '200':
+          description: Booking created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+        '400':
+          description: Bad request (e.g. gym full or user not found)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - bearerAuth: []
+  /api/subscriptions:
+    get:
+      summary: List subscriptions
+      tags:
+        - Subscriptions
+      responses:
+        '200':
+          description: Array of subscriptions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Subscription'
+    post:
+      summary: Create subscription
+      tags:
+        - Subscriptions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscriptionRequest'
+            example:
+              userId: 2
+              gymId: 1
+              startedAt: "2025-12-01T00:00:00"
+              endsAt: "2026-01-01T00:00:00"
+      responses:
+        '200':
+          description: Created subscription
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Gym is fully booked at this time"
+    RegisterRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        fullName:
+          type: string
+        email:
+          type: string
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT token to be used as Bearer token in Authorization header
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        username:
+          type: string
+        fullName:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      example:
+        id: 10
+        username: "alice"
+        fullName: "Alice Wonder"
+        email: "alice@example.com"
+        role: "USER"
+        createdAt: "2025-12-02T09:00:00Z"
+    Gym:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        address:
+          type: string
+        capacity:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      example:
+        id: 1
+        name: "Downtown Crossfit"
+        address: "123 Main St"
+        capacity: 40
+        createdAt: "2025-12-02T09:00:00Z"
+    GymCreateRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        address:
+          type: string
+        capacity:
+          type: integer
+    Booking:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        user:
+          $ref: '#/components/schemas/User'
+        gym:
+          $ref: '#/components/schemas/Gym'
+        startTime:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+      example:
+        id: 100
+        user:
+          id: 10
+          username: "alice"
+        gym:
+          id: 1
+          name: "Downtown Crossfit"
+        startTime: "2025-12-10T18:30:00"
+        createdAt: "2025-12-02T09:10:00Z"
+    BookingRequest:
+      type: object
+      required:
+        - gymId
+        - startTime
+      properties:
+        gymId:
+          type: integer
+          format: int64
+        startTime:
+          type: string
+          format: date-time
+    Subscription:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        user:
+          $ref: '#/components/schemas/User'
+        gym:
+          $ref: '#/components/schemas/Gym'
+        startedAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+    SubscriptionRequest:
+      type: object
+      required:
+        - userId
+        - gymId
+      properties:
+        userId:
+          type: integer
+          format: int64
+        gymId:
+          type: integer
+          format: int64
+        startedAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
